@@ -8,35 +8,42 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
     /// <summary>
     /// Keyboard key used to interface with <see cref="XRKeyboard"/>.
     /// </summary>
-    public class XRKeyboardKey : Button
+    public class XRKeyboardKey : Button, ICursorClickHandler, ICursorDownHandler, ICursorUpHandler, ICursorEnterHandler, ICursorExitHandler
     {
 
         /// <summary>
         /// Turn off pointer interactions
         /// </summary>
         /// <param name="eventData"></param>
-        public override void OnPointerDown(PointerEventData eventData)
-        {
+        public override void OnPointerDown(PointerEventData eventData)        {        }
+        public override void OnPointerEnter(PointerEventData eventData)        {        }
+        public override void OnPointerExit(PointerEventData eventData)        {        }
+        public override void OnPointerUp(PointerEventData eventData)        {        }
+        public override void OnPointerClick(PointerEventData eventData)        {        }
 
+        public void OnCursorClick()
+        {
+            throw new System.NotImplementedException();
         }
 
-        public override void OnPointerEnter(PointerEventData eventData)
+        public void OnCursorDown()
         {
-
+            throw new System.NotImplementedException();
         }
 
-        public override void OnPointerExit(PointerEventData eventData)
+        public void OnCursorUp()
         {
-
+            throw new System.NotImplementedException();
         }
 
-        public override void OnPointerUp(PointerEventData eventData)
+        public void OnCursorEnter()
         {
-
+            throw new System.NotImplementedException();
         }
 
-        public override void OnPointerClick(PointerEventData eventData)
+        public void OnCursorExit()
         {
+            throw new System.NotImplementedException();
         }
 
 
