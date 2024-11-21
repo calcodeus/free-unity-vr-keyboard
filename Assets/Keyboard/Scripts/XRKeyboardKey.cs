@@ -8,7 +8,7 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
     /// <summary>
     /// Keyboard key used to interface with <see cref="XRKeyboard"/>.
     /// </summary>
-    public class XRKeyboardKey : Button
+    public class XRKeyboardKey : CursorButton
     {
         [SerializeField, Tooltip("KeyFunction used for this key which is called when key is pressed. Used to communicate with the Keyboard.")]
         KeyFunction m_KeyFunction;
