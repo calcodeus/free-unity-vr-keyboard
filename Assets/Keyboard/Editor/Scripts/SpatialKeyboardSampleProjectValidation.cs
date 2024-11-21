@@ -42,7 +42,7 @@ namespace UnityEditor.XR.Interaction.Toolkit.Samples.SpatialKeyboard.Editor
             {
                 Message = $"[{k_SampleDisplayName}] {k_StarterAssetsSampleName} sample from XR Interaction Toolkit ({k_XRIPackageName}) package must be imported or updated to use this sample. {GetImportSampleVersionMessage(k_Category, k_StarterAssetsSampleName, PackageVersionUtility.GetPackageVersion(k_XRIPackageName))}",
                 Category = k_Category,
-                CheckPredicate = () => ProjectValidationUtility.SampleImportMeetsMinimumVersion(k_Category, k_StarterAssetsSampleName, PackageVersionUtility.GetPackageVersion(k_XRIPackageName)),
+                CheckPredicate = () => SampleImportMeetsMinimumVersion(k_Category, k_StarterAssetsSampleName, PackageVersionUtility.GetPackageVersion(k_XRIPackageName)),
                 FixIt = () =>
                 {
                     if (TryFindSample(k_XRIPackageName, string.Empty, k_StarterAssetsSampleName, out var sample))
@@ -51,7 +51,7 @@ namespace UnityEditor.XR.Interaction.Toolkit.Samples.SpatialKeyboard.Editor
                     }
                 },
                 FixItAutomatic = true,
-                Error = !ProjectValidationUtility.HasSampleImported(k_Category, k_StarterAssetsSampleName),
+                Error = !HasSampleImported(k_Category, k_StarterAssetsSampleName),
             },
 
             new BuildValidationRule
@@ -179,10 +179,113 @@ namespace UnityEditor.XR.Interaction.Toolkit.Samples.SpatialKeyboard.Editor
 
         static string GetImportSampleVersionMessage(string packageFolderName, string sampleDisplayName, PackageVersion version)
         {
-            if (ProjectValidationUtility.SampleImportMeetsMinimumVersion(packageFolderName, sampleDisplayName, version) || !ProjectValidationUtility.HasSampleImported(packageFolderName, sampleDisplayName))
+            if (SampleImportMeetsMinimumVersion(packageFolderName, sampleDisplayName, version) || !HasSampleImported(packageFolderName, sampleDisplayName))
                 return string.Empty;
 
             return $"An older version of {sampleDisplayName} has been found. This may cause errors.";
         }
+
+
+        private struct PackageSampleData
+    {
+        public string packageDisplayName;
+
+        public Dictionary<string, SampleData> importedSamples;
+    }
+
+    private struct SampleData
+    {
+        public string sampleName;
+
+        public string packageDisplayName;
+
+        public PackageVersion packageVersion;
+    }
+
+    private const string k_SamplesRootDirectoryName = "Samples";
+
+    private static Dictionary<string, PackageSampleData> s_PackageSampleCache;
+
+    public static bool HasSampleImported(string packageDisplayName, string sampleDisplayName)
+    {
+        if (s_PackageSampleCache == null)
+        {
+            UpdatePackageSampleCache();
+            if (s_PackageSampleCache == null)
+            {
+                return false;
+            }
+        }
+
+        PackageSampleData value;
+        return s_PackageSampleCache.TryGetValue(packageDisplayName, out value) && value.importedSamples.ContainsKey(sampleDisplayName);
+    }
+
+    public static bool SampleImportMeetsMinimumVersion(string packageDisplayName, string sampleDisplayName, PackageVersion minVersion)
+    {
+        if (HasSampleImported(packageDisplayName, sampleDisplayName))
+        {
+            return s_PackageSampleCache[packageDisplayName].importedSamples[sampleDisplayName].packageVersion >= minVersion;
+        }
+
+        return false;
+    }
+
+    private static void UpdatePackageSampleCache()
+    {
+        if (s_PackageSampleCache != null)
+        {
+            return;
+        }
+
+        try
+        {
+            s_PackageSampleCache = new Dictionary<string, PackageSampleData>();
+            char directorySeparatorChar = Path.DirectorySeparatorChar;
+            string text = Path.Combine(Path.GetFileName(Application.dataPath), "Samples");
+            if (!Directory.Exists(text))
+            {
+                Debug.LogWarning("Could not find Samples directory (" + text + "). Failed to update package sample cache.");
+                return;
+            }
+
+            string[] directories = Directory.GetDirectories(text);
+            string[] array = directories;
+            foreach (string text2 in array)
+            {
+                string text3 = text2.Split(directorySeparatorChar).Last();
+                Dictionary<string, SampleData> dictionary = new Dictionary<string, SampleData>();
+                string[] directories2 = Directory.GetDirectories(text2);
+                string[] array2 = directories2;
+                foreach (string text4 in array2)
+                {
+                    string version = text4.Split(directorySeparatorChar).Last();
+                    PackageVersion packageVersion = new PackageVersion(version);
+                    string[] directories3 = Directory.GetDirectories(text4);
+                    string[] array3 = directories3;
+                    foreach (string text5 in array3)
+                    {
+                        string text6 = text5.Split(directorySeparatorChar).Last();
+                        dictionary.Add(text6, new SampleData
+                        {
+                            sampleName = text6,
+                            packageDisplayName = text3,
+                            packageVersion = packageVersion
+                        });
+                    }
+                }
+
+                PackageSampleData packageSampleData = default(PackageSampleData);
+                packageSampleData.packageDisplayName = text3;
+                packageSampleData.importedSamples = dictionary;
+                PackageSampleData value = packageSampleData;
+                s_PackageSampleCache[text3] = value;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("Failed to update package sample cache. " + ex.Message);
+        }
+    }
     }
 }

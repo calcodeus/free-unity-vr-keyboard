@@ -1,13 +1,17 @@
 {
-    "name": "Unity.XR.Interaction.Toolkit.Samples.SpatialKeyboard",
-    "rootNamespace": "",
+    "name": "FreeVRKeyboard.Editor",
+    "rootNamespace": "UnityEditor.XR.Interaction.Toolkit.Samples.SpatialKeyboard.Editor",
     "references": [
-        "Unity.Mathematics",
         "Unity.TextMeshPro",
+        "Unity.XR.Interaction.Toolkit",
+        "Unity.XR.Interaction.Toolkit.Editor",
         "Unity.XR.CoreUtils",
-        "Unity.XR.Interaction.Toolkit"
+        "Unity.XR.CoreUtils.Editor",
+        "FreeVRKeyboard"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
@@ -17,7 +21,7 @@
     "versionDefines": [
         {
             "name": "com.unity.textmeshpro",
-            "expression": "3.0.8",
+            "expression": "3.0.6",
             "define": "TEXT_MESH_PRO_PRESENT"
         },
         {
