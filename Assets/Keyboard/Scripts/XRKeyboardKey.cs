@@ -8,8 +8,38 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
     /// <summary>
     /// Keyboard key used to interface with <see cref="XRKeyboard"/>.
     /// </summary>
-    public class XRKeyboardKey : CursorButton
+    public class XRKeyboardKey : Button
     {
+
+        /// <summary>
+        /// Turn off pointer interactions
+        /// </summary>
+        /// <param name="eventData"></param>
+        public override void OnPointerDown(PointerEventData eventData)
+        {
+
+        }
+
+        public override void OnPointerEnter(PointerEventData eventData)
+        {
+
+        }
+
+        public override void OnPointerExit(PointerEventData eventData)
+        {
+
+        }
+
+        public override void OnPointerUp(PointerEventData eventData)
+        {
+
+        }
+
+        public override void OnPointerClick(PointerEventData eventData)
+        {
+        }
+
+
         [SerializeField, Tooltip("KeyFunction used for this key which is called when key is pressed. Used to communicate with the Keyboard.")]
         KeyFunction m_KeyFunction;
 
@@ -272,21 +302,21 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             }
         }
 
-        /// <inheritdoc />
-        public override void OnPointerDown(PointerEventData eventData)
-        {
-            base.OnPointerDown(eventData);
-            if (m_UpdateOnKeyDown && interactable)
-                KeyClick();
-        }
+        // /// <inheritdoc />
+        // public override void OnPointerDown(PointerEventData eventData)
+        // {
+        //     base.OnPointerDown(eventData);
+        //     if (m_UpdateOnKeyDown && interactable)
+        //         KeyClick();
+        // }
 
-        /// <inheritdoc />
-        public override void OnPointerClick(PointerEventData eventData)
-        {
-            base.OnPointerClick(eventData);
-            if (!m_UpdateOnKeyDown)
-                KeyClick();
-        }
+        // /// <inheritdoc />
+        // public override void OnPointerClick(PointerEventData eventData)
+        // {
+        //     base.OnPointerClick(eventData);
+        //     if (!m_UpdateOnKeyDown)
+        //         KeyClick();
+        // }
 
         protected virtual void KeyClick()
         {
