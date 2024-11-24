@@ -9,6 +9,49 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
     {
         [SerializeField]
         private Canvas m_Canvas;
+
+        [SerializeField]
+        private float m_CursorSpeed = 1.0f;
+
+        public float CursorSpeed { get => m_CursorSpeed; set => m_CursorSpeed = value; }
+
+        public void PressDown()
+        {
+            UpdateButtonState(true);
+        }
+
+        public void PressUp()
+        {
+            UpdateButtonState(false);
+        }
+
+        public void MoveCursor(Vector2 direction)
+        {
+            if (m_Canvas == null)
+            {
+                RefreshCanvas();
+            }
+            transform.localPosition = (Vector2)transform.localPosition + m_CursorSpeed * Time.deltaTime * direction;
+            UpdatePosition(transform.position);
+        }
+
+        // public void MoveCursorTo(Vector2 position)
+        // {
+        //     if (m_Canvas == null)
+        //     {
+        //         RefreshCanvas();
+        //     }
+        //     UpdatePosition(position);
+        //     transform.position = position;
+        // }
+
+        protected override void Start()
+        {
+            RefreshCanvas();
+            base.Start();
+        }
+
+
         private readonly List<UIBehaviour> m_behaviours = new();
         private UIBehaviour m_HoveredBehaviour;
         private UIBehaviour m_PressedBehaviour;
@@ -31,6 +74,10 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             UIBehaviour targetBehaviour = null;
             foreach (var uIBehaviour in m_behaviours)
             {
+                if (uIBehaviour.gameObject == this.gameObject)
+                {
+                    continue;
+                }
                 RectTransform rect = uIBehaviour.transform as RectTransform;
                 if (rect.rect.Contains(position))
                 {
