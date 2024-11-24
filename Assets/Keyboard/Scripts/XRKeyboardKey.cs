@@ -15,35 +15,46 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
         /// Turn off pointer interactions
         /// </summary>
         /// <param name="eventData"></param>
-        public override void OnPointerDown(PointerEventData eventData)        {        }
-        public override void OnPointerEnter(PointerEventData eventData)        {        }
-        public override void OnPointerExit(PointerEventData eventData)        {        }
-        public override void OnPointerUp(PointerEventData eventData)        {        }
-        public override void OnPointerClick(PointerEventData eventData)        {        }
+        public override void OnPointerDown(PointerEventData eventData) { }
+        public override void OnPointerEnter(PointerEventData eventData) { }
+        public override void OnPointerExit(PointerEventData eventData) { }
+        public override void OnPointerUp(PointerEventData eventData) { }
+        public override void OnPointerClick(PointerEventData eventData) { }
 
         public void OnCursorClick()
         {
-            throw new System.NotImplementedException();
+            if (!m_UpdateOnKeyDown)
+                KeyClick();
         }
 
         public void OnCursorDown()
         {
-            throw new System.NotImplementedException();
+            // PointerEventData pointerEventData = new PointerEventData(EventSystem.current)
+            // {
+            //     button = PointerEventData.InputButton.Left
+            // };
+            // base.OnPointerDown(pointerEventData);
+            if (m_UpdateOnKeyDown && interactable)
+                KeyClick();
         }
 
         public void OnCursorUp()
         {
-            throw new System.NotImplementedException();
+            // PointerEventData pointerEventData = new PointerEventData(EventSystem.current)
+            // {
+            //     button = PointerEventData.InputButton.Left
+            // };
+            // base.OnPointerUp(pointerEventData);
         }
 
         public void OnCursorEnter()
         {
-            throw new System.NotImplementedException();
+            base.OnPointerEnter(null);
         }
 
         public void OnCursorExit()
         {
-            throw new System.NotImplementedException();
+            base.OnPointerExit(null);
         }
 
 

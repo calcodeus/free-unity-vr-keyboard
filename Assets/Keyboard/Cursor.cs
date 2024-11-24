@@ -52,9 +52,10 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
         }
 
 
-        private readonly List<UIBehaviour> m_behaviours = new();
-        private UIBehaviour m_HoveredBehaviour;
-        private UIBehaviour m_PressedBehaviour;
+        private readonly List<GameObject> m_behaviours = new();
+        private GameObject m_HoveredBehaviour;
+        private GameObject m_PressedBehaviour;
+        private readonly List<Component> m_ComponentsCache = new();
         private void RefreshCanvas()
         {
             if (m_Canvas == null)
@@ -62,26 +63,26 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
                 m_Canvas = GetComponentInParent<Canvas>();
             }
             m_behaviours.Clear();
-            foreach (var uIBehaviour in GetComponentsInChildren<UIBehaviour>())
+            foreach (var uIBehaviour in m_Canvas.GetComponentsInChildren<ICursorInteractable>())
             {
-                m_behaviours.Add(uIBehaviour);
+                m_behaviours.Add(((Component)uIBehaviour).gameObject);
             }
         }
 
         private void UpdatePosition(Vector2 position)
         {
             float lowestZ = int.MaxValue;
-            UIBehaviour targetBehaviour = null;
+            GameObject targetBehaviour = null;
             foreach (var uIBehaviour in m_behaviours)
             {
                 if (uIBehaviour.gameObject == this.gameObject)
                 {
                     continue;
                 }
-                RectTransform rect = uIBehaviour.transform as RectTransform;
-                if (rect.rect.Contains(position))
+                RectTransform rectTransform = uIBehaviour.transform as RectTransform;
+                if (rectTransform.rect.Contains(position))
                 {
-                    float zValue = m_Canvas.transform.InverseTransformPoint(rect.position).z;
+                    float zValue = m_Canvas.transform.InverseTransformPoint(rectTransform.position).z;
                     if (zValue < lowestZ)
                     {
                         lowestZ = zValue;
@@ -90,30 +91,37 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
                 }
             }
 
-            if (targetBehaviour != null)
-            {
-                if (m_HoveredBehaviour is ICursorExitHandler exitHandler)
-                {
-                    m_HoveredBehaviour = null;
-                    exitHandler.OnCursorExit();
-                }
-            }
-
             if (m_HoveredBehaviour != targetBehaviour)
             {
-                if (m_HoveredBehaviour is ICursorExitHandler exitHandler)
+                if (m_HoveredBehaviour != null)
                 {
-                    exitHandler.OnCursorExit();
+                    m_HoveredBehaviour.GetComponents(m_ComponentsCache);
+                    foreach (var component in m_ComponentsCache)
+                    {
+                        if (component is ICursorExitHandler exitHandler)
+                        {
+                            exitHandler.OnCursorExit();
+                        }
+                    }
                 }
+
                 m_HoveredBehaviour = targetBehaviour;
-                if (m_HoveredBehaviour is ICursorEnterHandler enterHandler)
+
+                if (m_HoveredBehaviour != null)
                 {
-                    enterHandler.OnCursorEnter();
+                    m_HoveredBehaviour.GetComponents(m_ComponentsCache);
+                    foreach (var component in m_ComponentsCache)
+                    {
+                        if (component is ICursorEnterHandler enterHandler)
+                        {
+                            enterHandler.OnCursorEnter();
+                        }
+                    }
                 }
-                if (m_HoveredBehaviour is Selectable selectable)
-                {
-                    selectable.Select();
-                }
+                // if (m_HoveredBehaviour is Selectable selectable)
+                // {
+                //     selectable.Select();
+                // }
             }
         }
 
@@ -121,21 +129,36 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
         {
             if (pressed)
             {
-                if (m_HoveredBehaviour is ICursorDownHandler downHandler)
+                m_HoveredBehaviour.GetComponents(m_ComponentsCache);
+                foreach (var component in m_ComponentsCache)
                 {
-                    m_PressedBehaviour = m_HoveredBehaviour;
-                    downHandler.OnCursorDown();
+                    if (component is ICursorDownHandler downHandler)
+                    {
+                        m_PressedBehaviour = m_HoveredBehaviour;
+                        downHandler.OnCursorDown();
+                    }
                 }
             }
             else
             {
-                if (m_PressedBehaviour is ICursorUpHandler upHandler)
+                m_HoveredBehaviour.GetComponents(m_ComponentsCache);
+                foreach (var component in m_ComponentsCache)
                 {
-                    upHandler.OnCursorUp();
+                    if (component is ICursorUpHandler upHandler)
+                    {
+                        upHandler.OnCursorUp();
+                    }
                 }
-                if (m_PressedBehaviour == m_HoveredBehaviour && m_PressedBehaviour is ICursorClickHandler clickHandler)
+                if (m_PressedBehaviour == m_HoveredBehaviour)
                 {
-                    clickHandler.OnCursorClick();
+                    m_PressedBehaviour.GetComponents(m_ComponentsCache);
+                    foreach (var component in m_ComponentsCache)
+                    {
+                        if (component is ICursorClickHandler clickHandler)
+                        {
+                            clickHandler.OnCursorClick();
+                        }
+                    }
                 }
                 m_PressedBehaviour = null;
             }
@@ -143,27 +166,32 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
 
     }
 
-    public interface ICursorClickHandler
+    public interface ICursorInteractable
+    {
+
+    }
+
+    public interface ICursorClickHandler : ICursorInteractable
     {
         void OnCursorClick();
     }
 
-    public interface ICursorDownHandler
+    public interface ICursorDownHandler : ICursorInteractable
     {
         void OnCursorDown();
     }
 
-    public interface ICursorUpHandler
+    public interface ICursorUpHandler : ICursorInteractable
     {
         void OnCursorUp();
     }
 
-    public interface ICursorEnterHandler
+    public interface ICursorEnterHandler : ICursorInteractable
     {
         void OnCursorEnter();
     }
 
-    public interface ICursorExitHandler
+    public interface ICursorExitHandler : ICursorInteractable
     {
         void OnCursorExit();
     }
